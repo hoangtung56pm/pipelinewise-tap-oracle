@@ -109,7 +109,7 @@ def schema_for_column(c, pks_for_table, use_singer_decimal):
    elif data_type == 'date':
       result.type = nullable_column(c.column_name, 'string', pks_for_table)
       result.description = 'date'
-      result.format = 'date-time'
+      result.format = 'oracle-date'
       return result
    
    elif data_type.startswith("timestamp"):

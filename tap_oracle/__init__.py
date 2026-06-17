@@ -303,7 +303,34 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables, use_
 
    if filter_tables:
       # Restrict columns to tables/views based on filter_table
-      table_filter = """owner||'-'||table_name IN ({})""".format(','.join(f"'{t.rstrip('.*')}'" for t in filter_tables))
+      # table_filter = """owner||'-'||table_name IN ({})""".format(','.join(f"'{t.rstrip('.*')}'" for t in filter_tables))
+      # filter = f"{table_filter} AND {filter}"
+      conditions = []
+
+      for table in filter_tables:
+         table = table.rstrip(".*")
+
+         # Config cũ:
+         # TPRLBOND-BOND_INFO.*
+         if "-" in table:
+               owner, tbl = table.split("-", 1)
+
+               conditions.append(
+                  f"(OWNER = '{owner.upper()}' "
+                  f"AND TABLE_NAME = '{tbl.upper()}')"
+               )
+
+         # Config mới:
+         # BOND_INFO.*
+         else:
+               for owner in filter_schemas:
+                  conditions.append(
+                     f"(OWNER = '{owner.upper()}' "
+                     f"AND TABLE_NAME = '{table.upper()}')"
+                  )
+
+      table_filter = "(" + " OR ".join(conditions) + ")"
+
       filter = f"{table_filter} AND {filter}"
 
    if binds_sql:
